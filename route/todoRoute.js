@@ -6,18 +6,19 @@ const Todo = new mongoose.model("Todo", todoSchema);
 
 // GET ALL THE TODOS
 router.get("/", async (req, res) => {
-  await Todo.find({ status: "active" }, (err, data) => {
-    if (err) {
-      res.status(500).json({
-        error: "There was a server side error",
-      });
-    } else {
-      res.status(200).json({
-        result: data,
-        message: "success",
-      });
-    }
-  }).clone();
+  
+  try {
+    const data = await Todo.find({ status: "active" });
+    res.status(200).json({
+      result: data,
+      message: "success",
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
+
 });
 
 // GET A TODOS BY ID
@@ -25,71 +26,70 @@ router.get("/:id", async (req, res) => {});
 
 // POST A TODO
 router.post("/", async (req, res) => {
-  const newTodo = new Todo(req.body);
-  await newTodo.save((err) => {
-    if (err) {
-      res.status(500).json({
-        error: "There was a server side error",
-      });
-    } else {
-      res.status(200).json({
-        message: "Todo was inserted Successfully",
-      });
-    }
-  });
+
+  try {
+    const newTodo = new Todo(req.body);
+    const data = await newTodo.save();
+    res.status(200).json({
+      message: "Todo was inserted Successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
+
 });
 
 // POST MULTIPLE TODO
 router.post("/all", async (req, res) => {
-  await Todo.insertMany(req.body, (err) => {
-    if (err) {
-      res.status(500).json({
-        error: "There was a server side error",
-      });
-    } else {
-      res.status(200).json({
+
+  try {
+    const data = Todo.insertMany(req.body);
+    res.status(200).json({
         message: "Todo was inserted Successfully",
       });
-    }
-  });
+  } catch (err) {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
+
 });
 
 // PUT TODO
 router.put("/:id", async (req, res) => {
-  await Todo.updateOne(
+  try {
+    const data = await Todo.updateOne(
     { _id: req.params.id },
     {
       $set: {
-        status: "active",
+        status: "inactive",
       },
-    },
-    (err) => {
-      if (err) {
-        res.status(500).json({
-          error: "There was a server side error",
-        });
-      } else {
-        res.status(200).json({
-          message: "Todo was Updated Successfully",
-        });
-      }
-    }
-  ).clone();
+    });
+    res.status(200).json({
+      message: "Todo is Updated Successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
+
 });
 
 // DELETE TODO
 router.delete("/:id", async (req, res) => {
-    await Todo.deleteOne({_id:req.params.id}, (err)=>{
-        if (err) {
-          res.status(500).json({
-            error: "There was a server side error",
-          });
-        } else {
-          res.status(200).json({
+  try {
+    const data = await Todo.deleteOne({_id:req.params.id});
+    res.status(200).json({
             message: "Todo Deleted Successfully",
           });
-        }
-    }).clone()
+  } catch (err) {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
 });
 
 module.exports = router;
